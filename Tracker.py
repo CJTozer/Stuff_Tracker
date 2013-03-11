@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Configuration
 DATABASE = '/tmp/japanese.db'
-DEBUG = True
+DEBUG = False
 SECRET_KEY = 'hJ$3qW:l2012'
 USERNAME = 'chris'
 PASSWORD = '!bootstrap'
@@ -196,4 +196,4 @@ def get_class_for_entry(entry):
 
 # Script entry point
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
