@@ -2,7 +2,9 @@ import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from contextlib import closing
 from Resource import Resource
-import matplotlib.pyplot as plt                 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt               
 from flask.helpers import send_file
 import time
 from datetime import datetime
