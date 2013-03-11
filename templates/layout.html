@@ -1,0 +1,26 @@
+<!doctype html>
+<title>Stuff Tracker</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap-responsive.css') }}">
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='flaskr.js') }}"></script>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<div class=navbar>
+	<div class=navbar-inner>
+		<p class=brand>Stuff Tracker</p>
+		<p class="navbar-text pull-right">
+        {% if not session.logged_in %}
+        	<a href="{{ url_for('login') }}">log in</a>
+  		{% else %}
+    		<a href="{{ url_for('logout') }}">log out</a>
+  		{% endif %}              
+        </p>
+	</div>
+</div>
+<div class=page>  
+  	{% for message in get_flashed_messages() %}
+    	<div class=alert>{{ message }}</div>
+  	{% endfor %}
+  	{% block body %}{% endblock %}
+</div>

@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block body %}
+ 	<div class=container-fluid>
+ 	    <div class="row-fluid">
+ 	        <div class="span7">
+         	{% if session.logged_in %}
+             	<div class="container">
+             	    <form action="{{ url_for('add_resource') }}" method="post" class="form-horizontal">
+            			<input class=input-xlarge type="text" name="resource_name" placeholder="New Resource"/>
+            		</form>
+            	</div>
+          	{% endif %}
+          	{% for resource in resources %}
+        		<div class="well well-small">
+        		    <div class="row-fluid">
+        		        <div class="span4">
+                            <h4 class=media-heading>{{ resource.name }}</h4>
+                        </div>
+                        <div class="span2">
+                            {{ resource.total_time_string() | safe }}
+                        </div>
+            		    <form action="{{ url_for('add_component', res_id=resource.res_id) }}" method="post" class="pull-right">
+                            <input class=input-medium type="text" name="component_name" placeholder="New Component"/>
+                        </form>
+            		</div>
+            		{% for component in resource.components %}
+            		<div class="row-fluid">
+            		    <div class="span4">{{ component.name }}</div>
+            		    <div class="span2">{{ component.time_string() | safe }}</div>
+        		        {% for btn_grp in component.button_groups() %}
+                        <div class="btn-group">
+                            {% for btn in btn_grp %}
+                            {{ btn.to_html_element(url_for(btn.url_base, **btn.url_kwargs)) | safe }}
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+            		</div>
+            		{% else %}
+            		<div class="row-fluid">
+                        <div class="span4">No components yet for this resource</div>
+                    </div>
+                    {% endfor %}
+        		</div>
+          	{% else %}
+          	    <div class="well">
+                    <div class="row-fluid">
+                        <div class="span4">
+                            <h4 class=media-heading>No resources yet</h4>
+                        </div>
+                    </div>
+                </div>
+          	{% endfor %}
+          	</div>
+          	<div class="span5"
+          	    <div class="well">
+                    <div class="row-fluid">
+                        <div class="span12">
+                            <img src="{{ url_for('get_graph', graph_type='full') }}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+  	</div>
+{% endblock %}
