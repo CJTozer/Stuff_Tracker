@@ -161,4 +161,7 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+
+# Custom stuff_tracker bits
 img/graph*.png
+*.db
