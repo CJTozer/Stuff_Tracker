@@ -10,9 +10,9 @@ import time
 from datetime import datetime
 
 # Configuration
-DATABASE = '/tmp/japanese.db'
+DATABASE = 'stuff_tracker.db'
 DEBUG = False
-SECRET_KEY = 'hJ$3qW:l2012'
+SECRET_KEY = '1eV6BSdsNTVT'
 USERNAME = 'chris'
 PASSWORD = '!bootstrap'
 
@@ -77,6 +77,13 @@ def complete(comp_id):
 
 @app.route('/get_graph/<string:graph_type>')
 def get_graph(graph_type):
+    url = "./img/graph_%s.png" % graph_type
+    return send_file(url, mimetype="image/png")
+
+@app.route('/update_graph/<string:graph_type>')
+def update_graph(graph_type):
+    update_times()
+    
     url = "./img/graph_%s.png" % graph_type
     resource_map = {res.res_id : res.name for res in get_all_resources()}
     plots = []
