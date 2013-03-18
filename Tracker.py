@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 
 # Configuration
-DATABASE = 'stuff_tracker.db'
+DATABASE = 'data/stuff_tracker.db'
 DEBUG = False
 SECRET_KEY = '1eV6BSdsNTVT'
 USERNAME = 'chris'
