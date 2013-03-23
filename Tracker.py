@@ -6,12 +6,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt               
 from flask.helpers import send_file
-import time
+import time, traceback, os
 from datetime import datetime
 
 # Configuration
-DATABASE = 'data/stuff_tracker.db'
-DEBUG = False
+DATABASE = os.path.join(os.path.dirname(__file__), 'data/stuff_tracker.db')
+DEBUG = True 
 SECRET_KEY = '1eV6BSdsNTVT'
 USERNAME = 'chris'
 PASSWORD = '!bootstrap'
