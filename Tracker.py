@@ -10,8 +10,9 @@ import time, traceback, os
 from datetime import datetime
 
 # Configuration
-DATABASE = os.path.join(os.path.dirname(__file__), 'data/stuff_tracker.db')
-DEBUG = True 
+DATABASE = os.path.join(os.path.dirname(__file__), 'data', 'stuff_tracker.db')
+IMG_BASE = os.path.join(os.path.dirname(__file__), 'img', 'graph_%s.png')
+DEBUG = False 
 SECRET_KEY = '1eV6BSdsNTVT'
 USERNAME = 'chris'
 PASSWORD = '!bootstrap'
@@ -77,14 +78,14 @@ def complete(comp_id):
 
 @app.route('/get_graph/<string:graph_type>')
 def get_graph(graph_type):
-    url = "./img/graph_%s.png" % graph_type
+    url = IMG_BASE % graph_type
     return send_file(url, mimetype="image/png")
 
 @app.route('/update_graph/<string:graph_type>')
 def update_graph(graph_type):
     update_times()
     
-    url = "./img/graph_%s.png" % graph_type
+    url = IMG_BASE % graph_type
     resource_map = {res.res_id : res.name for res in get_all_resources()}
     plots = []
     plot_names = [] 
