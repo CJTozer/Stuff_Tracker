@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt               
 from flask.helpers import send_file
-import time, traceback, os
+import time, os
 from datetime import datetime
 
 # Configuration
