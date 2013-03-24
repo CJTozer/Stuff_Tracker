@@ -56,12 +56,6 @@
                     <div class="row-fluid">
                         <div class="span12">
                             <img id="graph_full" src="{{ url_for('update_graph', graph_type='full') }}" />
-                            <script type="text/javascript">
-                                $("#graph_full").click(function(e) { 
-                                    $("#graph_full").load("{{ url_for('update_graph', graph_type='full') }}");
-                                    return false;
-                                });
-                            </script>
                         </div>
                     </div>
                 </div>

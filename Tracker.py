@@ -12,7 +12,7 @@ from datetime import datetime
 # Configuration
 DATABASE = os.path.join(os.path.dirname(__file__), 'data', 'stuff_tracker.db')
 IMG_BASE = os.path.join(os.path.dirname(__file__), 'img')
-DEBUG = False 
+DEBUG = False
 SECRET_KEY = '1eV6BSdsNTVT'
 USERNAME = 'chris'
 PASSWORD = '!bootstrap'
@@ -117,6 +117,12 @@ def update_graph(graph_type):
     return send_file(url, mimetype="image/png")
 
 
+# Functions exposed to templates
+@app.template_filter('get_current_time')
+def get_current_time(unused=0):
+    return int(time.mktime(time.gmtime()))
+
+
 # Utilities
 def query_db(query, args=(), one=False):
     cur = g.db.execute(query, args)
@@ -137,7 +143,7 @@ def get_all_resources():
 def update_times():
     for resource in get_all_resources():
         update_db('insert into resource_time_tracking (timestamp, res_id, time_spent) values (?, ?, ?)',
-                  (time.mktime(time.gmtime()), resource.res_id, resource.total_time()))
+                  (get_current_time(), resource.res_id, resource.total_time()))
         
 
 
