@@ -33,15 +33,43 @@ def init_db():
         
 @app.before_request
 def before_request():
+    g.db = None
+    if 'logged_in' not in session:
+        # Only allow static or login page to be accessed
+        print request.endpoint
+        if request.endpoint != 'login' and request.endpoint != 'static':
+            #abort(401)
+            return redirect(url_for('login'))
     g.db = connect_db()
     
 @app.teardown_request
 def teardown_request(exception):
-    g.db.close()
+    if g.db:
+        g.db.close()
 
 @app.route('/')
 def show_resources():         
     return render_template('resources.html', resources=get_all_resources())
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != app.config['USERNAME']:
+            error = 'Invalid username'
+        elif request.form['password'] != app.config['PASSWORD']:
+            error = 'Invalid password'
+        else:
+            session['logged_in'] = True
+            flash('You were logged in')
+            return redirect(url_for('show_resources'))
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    flash('You were logged out')
+    return redirect(url_for('show_resources'))
 
 @app.route('/add_resource', methods=['POST'])
 def add_resource():
@@ -145,72 +173,6 @@ def update_times():
         update_db('insert into resource_time_tracking (timestamp, res_id, time_spent) values (?, ?, ?)',
                   (get_current_time(), resource.res_id, resource.total_time()))
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @@@ For reference...
-
-@app.route('/update/<int:entry_id>/<string:text>', methods=['GET', 'POST'])
-def update_entry(entry_id, text):
-    g.db.execute('update entries set text=? where entry_id=?', (text, entry_id))
-    g.db.commit()
-    flash('Updated entry %d' % entry_id)
-    return redirect(url_for('show_resources'))
-
-@app.route('/add', methods=['POST'])
-def add_entry():
-    if not session.get('logged_in'):
-        abort(401)
-    g.db.execute('insert into entries (title, text, priority) values (?, ?, ?)',
-                 [request.form['title'], request.form['text'], request.form['priority']])
-    g.db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_resources'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('show_resources'))
-    return render_template('login.html', error=error)
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('show_resources'))
-
-# Utilities
-@app.template_filter('get_class_for_entry')
-def get_class_for_entry(entry):
-    # FUTURE - if done => alert-success
-    print entry
-    classes = {
-        0 : "alert-block",
-        1 : "alert alert-info",
-        2 : "alert",
-        3 : "alert alert-error"}
-    return classes[entry['priority'] or 0]
 
 # Script entry point
 if __name__ == '__main__':

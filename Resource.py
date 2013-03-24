@@ -1,7 +1,7 @@
 from GUIElements import CompleteButton, TimeButton
 from Utils import time_string
 
-TIME_BUTTONS = [["+10m", 10], ["+15m", 15], ["+20m", 20], ["+30m", 30], ["+1h", 60]]  
+TIME_BUTTONS = [["+1m", 1], ["+5m", 5], ["+10m", 10], ["+15m", 15], ["+20m", 20], ["+30m", 30], ["+1h", 60]]  
 
 class Resource(object):
     def __init__(self, db_row, component_rows):
