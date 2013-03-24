@@ -11,11 +11,10 @@ from datetime import datetime
 
 # Configuration
 DATABASE = os.path.join(os.path.dirname(__file__), 'data', 'stuff_tracker.db')
+PASS_DATA= os.path.join(os.path.dirname(__file__), 'data', 'pass_data.db')
 IMG_BASE = os.path.join(os.path.dirname(__file__), 'img')
-DEBUG = False
+DEBUG = True
 SECRET_KEY = '1eV6BSdsNTVT'
-USERNAME = 'chris'
-PASSWORD = '!bootstrap'
 
 # Application
 app = Flask(__name__)
@@ -24,6 +23,9 @@ app.config.from_object(__name__)
 # Database functions
 def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
+
+def connect_pass_db():
+    return sqlite3.connect(app.config['PASS_DATA'])
 
 def init_db():
     with closing(connect_db()) as db:
@@ -55,10 +57,16 @@ def show_resources():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
+        pass_db = connect_pass_db()
+        password = query_db(pass_db,
+                            'select password from authentication where lower(username)=?',
+                            (request.form['username'].lower(),),
+                            one=True)
+        
+        if not password:
+            error = 'Invalid username/password'
+        elif request.form['password'] != password['password']:
+            error = 'Invalid username/password'
         else:
             session['logged_in'] = True
             flash('You were logged in')
@@ -75,7 +83,7 @@ def logout():
 def add_resource():
     if not session.get('logged_in'):
         abort(401)
-    update_db('insert into resources (name) values (?)', (request.form['resource_name'],))
+    update_db(g.db, 'insert into resources (name) values (?)', (request.form['resource_name'],))
     flash('New resource was successfully added')
     return redirect(url_for('show_resources'))
 
@@ -83,7 +91,8 @@ def add_resource():
 def add_component(res_id):
     if not session.get('logged_in'):
         abort(401)
-    update_db('insert into components (res_id, name, time, complete) values (?, ?, ?, ?)',
+    update_db(g.db, 
+              'insert into components (res_id, name, time, complete) values (?, ?, ?, ?)',
               (res_id, request.form['component_name'], 0.0, False))
     flash('New component was successfully added')
     return redirect(url_for('show_resources'))
@@ -93,7 +102,7 @@ def spend_time(comp_id, time):
     if not session.get('logged_in'):
         abort(401)
     update_times()
-    update_db('update components set time=time+? where comp_id=?', (time, comp_id))
+    update_db(g.db, 'update components set time=time+? where comp_id=?', (time, comp_id))
     update_times()    
     return redirect(url_for('show_resources'))
 
@@ -101,7 +110,7 @@ def spend_time(comp_id, time):
 def complete(comp_id):
     if not session.get('logged_in'):
         abort(401)
-    update_db('update components set complete=? where comp_id=?', (True, comp_id))
+    update_db(g.db, 'update components set complete=? where comp_id=?', (True, comp_id))
     return redirect(url_for('show_resources'))
 
 @app.route('/get_graph/<string:graph_type>')
@@ -121,7 +130,7 @@ def update_graph(graph_type):
     plot_names = [] 
     
     series = {}
-    db_data = query_db('select * from resource_time_tracking order by timestamp')
+    db_data = query_db(g.db, 'select * from resource_time_tracking order by timestamp')
     for row in db_data:
         res_id = row['res_id']
         if not series.has_key(res_id):
@@ -152,25 +161,27 @@ def get_current_time(unused=0):
 
 
 # Utilities
-def query_db(query, args=(), one=False):
-    cur = g.db.execute(query, args)
+def query_db(db, query, args=(), one=False):
+    cur = db.execute(query, args)
     rv = [dict((cur.description[idx][0], value)
                for idx, value in enumerate(row)) for row in cur.fetchall()]
     return (rv[0] if rv else None) if one else rv
 
-def update_db(update, args=()):
-    g.db.execute(update, args)
-    g.db.commit()
+def update_db(db, update, args=()):
+    db.execute(update, args)
+    db.commit()
 
 def get_all_resources():
     return [Resource(db_row,
-                     query_db('select * from components where res_id = ? order by comp_id',
+                     query_db(g.db,
+                              'select * from components where res_id = ? order by comp_id',
                               args=(db_row['res_id'],)))
-            for db_row in query_db('select * from resources order by res_id')]
+            for db_row in query_db(g.db, 'select * from resources order by res_id')]
 
 def update_times():
     for resource in get_all_resources():
-        update_db('insert into resource_time_tracking (timestamp, res_id, time_spent) values (?, ?, ?)',
+        update_db(g.db, 
+                  'insert into resource_time_tracking (timestamp, res_id, time_spent) values (?, ?, ?)',
                   (get_current_time(), resource.res_id, resource.total_time()))
         
 
