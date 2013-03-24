@@ -137,7 +137,7 @@ def get_all_resources():
 def update_times():
     for resource in get_all_resources():
         update_db('insert into resource_time_tracking (timestamp, res_id, time_spent) values (?, ?, ?)',
-                  (time.time(), resource.res_id, resource.total_time()))
+                  (time.mktime(time.gmtime()), resource.res_id, resource.total_time()))
         
 
 
